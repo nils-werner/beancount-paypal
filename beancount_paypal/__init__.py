@@ -145,16 +145,18 @@ class PaypalImporter(importer.ImporterProtocol):
 
     def identify(self, filename):
         with csv_open(filename.name) as rows:
-            row = next(rows)
-            if not self.language.identify(list(next(rows).keys())):
-                return False
+            try:
+                row = next(rows)
+                if not self.language.identify(list(next(rows).keys())):
+                    return False
 
-            row = next(rows)
-            row = self.language.normalize_keys(row)
-            if not (row['from'] == self.email_address or row['to'] == self.email_address):
-                return False
+                row = self.language.normalize_keys(row)
+                if not (row['from'] == self.email_address or row['to'] == self.email_address):
+                    return False
 
-            return True
+                return True
+            except StopIteration:
+                return False
 
 
     def extract(self, filename):
