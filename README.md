@@ -37,7 +37,7 @@ If you enable additional report fields you can map them into transaction metadat
 `metadata_map` keyword argument:
 
 ```python
-from beancount_paypal import PaypalImporter
+from beancount_paypal import PaypalImporter, lang
 
 CONFIG = [
     PaypalImporter(
@@ -45,6 +45,7 @@ CONFIG = [
         'Assets:US:PayPal',
         'Assets:US:Checking',
         'Expenses:Financial:Commission',
+        language=lang.de(),
         metadata_map={
             "uuid": "Transaktionscode",
             "sender": "Absender E-Mail-Adresse",
