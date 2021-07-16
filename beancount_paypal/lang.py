@@ -1,3 +1,5 @@
+from datetime import datetime
+
 class base():
     def identify(self, fields):
         return all(elem in fields for elem in list(self.fields_map.keys())[:-4])  # last 4 keys are optional
