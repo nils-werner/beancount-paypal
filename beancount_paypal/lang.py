@@ -37,7 +37,6 @@ class en(base):
         "Transaction ID": "txn_id",
         "Reference Txn ID": "reference_txn_id",
         "Receipt ID": "receipt_id",
-        "Type": "type",
         # Optional keys:
         "Item Title": "item_title",
         "Subject": "subject",
@@ -81,7 +80,6 @@ class de(base):
         "Betreff": "subject",
         "Hinweis": "note",
         "Guthaben": "balance",
-        "Balance Impact": "balance_impact",
     }
 
     metadata_map = {

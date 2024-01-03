@@ -80,7 +80,7 @@ class PaypalImporter(importer.ImporterProtocol):
                 row['net'] = self.language.decimal(row['net'])
                 
                 holds_etc = ['Account Hold for Open Authorization', 'Reversal of General Account Hold']
-                if row['type'] in holds_etc:
+                if row['txn_type'] in holds_etc:
                     continue
 
                 if row['reference_txn_id'] != last_txn_id:
