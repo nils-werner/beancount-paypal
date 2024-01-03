@@ -79,7 +79,7 @@ class PaypalImporter(importer.ImporterProtocol):
                 row['fee'] = self.language.decimal(row['fee'])
                 row['net'] = self.language.decimal(row['net'])
 
-                if row['balance_impact'] == 'Memo':
+                if row['type'] in ['Account Hold for Open Authorization', 'Reversal of General Account Hold']:
                     continue
 
                 if row['reference_txn_id'] != last_txn_id:
