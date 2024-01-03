@@ -37,7 +37,7 @@ class en(base):
         "Transaction ID": "txn_id",
         "Reference Txn ID": "reference_txn_id",
         "Receipt ID": "receipt_id",
-        "Balance Impact": "balance_impact",
+        "Type": "type",
         # Optional keys:
         "Item Title": "item_title",
         "Subject": "subject",
