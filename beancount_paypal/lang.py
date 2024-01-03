@@ -42,6 +42,7 @@ class en(base):
         "Subject": "subject",
         "Note": "note",
         "Balance": "balance",
+        "Balance Impact": "balance_impact",
     }
 
     metadata_map = {
@@ -80,6 +81,7 @@ class de(base):
         "Betreff": "subject",
         "Hinweis": "note",
         "Guthaben": "balance",
+        "Balance Impact": "balance_impact",
     }
 
     metadata_map = {

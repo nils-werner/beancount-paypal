@@ -56,6 +56,9 @@ class PaypalImporter(importer.ImporterProtocol):
                 row = self.language.normalize_keys(row)
                 if not (row['from'] == self.email_address or row['to'] == self.email_address):
                     return False
+                
+                if (row['balance_impact'] == 'Memo'):
+                    return False
 
                 return True
             except StopIteration:
