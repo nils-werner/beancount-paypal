@@ -79,7 +79,7 @@ class PaypalImporter(importer.ImporterProtocol):
                 row['fee'] = self.language.decimal(row['fee'])
                 row['net'] = self.language.decimal(row['net'])
                 
-                holds_etc = ['Account Hold for Open Authorization', 'Reversal of General Account Hold']
+                holds_etc = ['Account Hold for Open Authorization', 'Reversal of General Account Hold', 'General Withdrawal']
                 if row['txn_type'] in holds_etc:
                     continue
 
