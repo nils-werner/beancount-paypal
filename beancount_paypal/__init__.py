@@ -56,9 +56,6 @@ class PaypalImporter(importer.ImporterProtocol):
                 row = self.language.normalize_keys(row)
                 if not (row['from'] == self.email_address or row['to'] == self.email_address):
                     return False
-                
-                if (row['balance_impact'] == 'Memo'):
-                    return False
 
                 return True
             except StopIteration:
@@ -78,9 +75,12 @@ class PaypalImporter(importer.ImporterProtocol):
                 row = self.language.normalize_keys(row)
 
                 row['date'] = self.language.parse_date(row['date']).date()
-                row['gross'] = self.languasdage.decimal(row['gross'])
+                row['gross'] = self.language.decimal(row['gross'])
                 row['fee'] = self.language.decimal(row['fee'])
                 row['net'] = self.language.decimal(row['net'])
+
+                if row['balance_impact'] == 'Memo':
+                    continue
 
                 if row['reference_txn_id'] != last_txn_id:
                     meta = data.new_metadata(filename.name, index, metadata)
