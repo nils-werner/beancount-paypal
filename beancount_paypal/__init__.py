@@ -78,8 +78,9 @@ class PaypalImporter(importer.ImporterProtocol):
                 row['gross'] = self.language.decimal(row['gross'])
                 row['fee'] = self.language.decimal(row['fee'])
                 row['net'] = self.language.decimal(row['net'])
-
-                if row['type'] in ['Account Hold for Open Authorization', 'Reversal of General Account Hold']:
+                
+                holds_etc = ['Account Hold for Open Authorization', 'Reversal of General Account Hold']
+                if row['type'] in holds_etc:
                     continue
 
                 if row['reference_txn_id'] != last_txn_id:
