@@ -86,7 +86,7 @@ class PaypalImporter(importer.ImporterProtocol):
                 if row['txn_type'] in holds_etc:
                     continue
                 bank_deps_withdrawals = [
-                    'Bank Deposit to PP Account',
+                    'Bank Deposit to PP Account ',
                     'General Withdrawal',
                 ]
                 if row['txn_type'] in bank_deps_withdrawals:
