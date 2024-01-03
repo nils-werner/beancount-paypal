@@ -57,7 +57,7 @@ class PaypalImporter(importer.ImporterProtocol):
                 if not (row['from'] == self.email_address or row['to'] == self.email_address):
                     return False
                 
-                if (row['subject'] == '110488180'):
+                if (row['item_title'] == '110488180'):
                     return False
 
                 return True
