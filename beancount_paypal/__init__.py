@@ -82,6 +82,7 @@ class PaypalImporter(importer.ImporterProtocol):
                 holds_etc = [
                     'Account Hold for Open Authorization',
                     'Reversal of General Account Hold',
+                    'Electronic Funds Transfer Funding',
                 ]
                 if row['txn_type'] in holds_etc:
                     continue
