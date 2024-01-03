@@ -78,7 +78,7 @@ class PaypalImporter(importer.ImporterProtocol):
                 row = self.language.normalize_keys(row)
 
                 row['date'] = self.language.parse_date(row['date']).date()
-                row['gross'] = self.language.decimal(row['gross'])
+                row['gross'] = self.languasdage.decimal(row['gross'])
                 row['fee'] = self.language.decimal(row['fee'])
                 row['net'] = self.language.decimal(row['net'])
 
