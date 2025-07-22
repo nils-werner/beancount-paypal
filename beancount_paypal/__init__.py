@@ -23,7 +23,7 @@ class PaypalImporter(Importer):
     def __init__(
         self,
         email_address,
-        account,
+        file_account,
         checking_account,
         commission_account,
         language=None,
@@ -36,7 +36,7 @@ class PaypalImporter(Importer):
             metadata_map = language.metadata_map
 
         self.email_address = email_address
-        self.account = account
+        self.account = file_account
         self.checking_account = checking_account
         self.commission_account = commission_account
         self.language = language
