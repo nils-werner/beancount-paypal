@@ -54,7 +54,7 @@ class PaypalImporter(importer.ImporterProtocol):
                     return False
 
                 row = self.language.normalize_keys(row)
-                if not (row['from'] == self.email_address or row['to'] == self.email_address):
+                if not (row['from'] in self.email_address or row['to'] in self.email_address):
                     return False
 
                 return True
@@ -78,6 +78,20 @@ class PaypalImporter(importer.ImporterProtocol):
                 row['gross'] = self.language.decimal(row['gross'])
                 row['fee'] = self.language.decimal(row['fee'])
                 row['net'] = self.language.decimal(row['net'])
+                
+                holds_etc = [
+                    'Account Hold for Open Authorization',
+                    'Reversal of General Account Hold',
+                    'Electronic Funds Transfer Funding',
+                ]
+                if row['txn_type'] in holds_etc:
+                    continue
+                bank_deps_withdrawals = [
+                    'Bank Deposit to PP Account ',
+                    'General Withdrawal',
+                ]
+                if row['txn_type'] in bank_deps_withdrawals:
+                    continue
 
                 if row['reference_txn_id'] != last_txn_id:
                     meta = data.new_metadata(filename.name, index, metadata)
