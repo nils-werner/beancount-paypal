@@ -1,6 +1,5 @@
 from beancount.core.number import D
 from beangulp.importer import Importer
-from beancount.core import account
 from beancount.core import amount
 from beancount.core import flags
 from beancount.core import data
