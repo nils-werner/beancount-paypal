@@ -1,5 +1,5 @@
 from beancount.core.number import D
-from beancount.ingest import importer
+from beangulp.importer import Importer
 from beancount.core import account
 from beancount.core import amount
 from beancount.core import flags
@@ -20,7 +20,7 @@ def csv_open(filename):
         yield csv.DictReader(f, quotechar='"')
 
 
-class PaypalImporter(importer.ImporterProtocol):
+class PaypalImporter(Importer):
     def __init__(
         self,
         email_address,
