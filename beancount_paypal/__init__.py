@@ -15,10 +15,9 @@ import os
 from . import lang
 
 @contextmanager
-def csv_open(filename):
-    with open(filename, newline='', encoding='utf-8-sig') as f:
+def csv_open(filepath):
+    with open(filepath, newline='', encoding='utf-8-sig') as f:
         yield csv.DictReader(f, quotechar='"')
-
 
 class PaypalImporter(Importer):
     def __init__(
@@ -43,35 +42,32 @@ class PaypalImporter(Importer):
         self.language = language
         self.metadata_map = metadata_map
 
-    def file_account(self, _):
+    def account(self, filepath: str):
         return self.account
 
-    def identify(self, filename):
-        with csv_open(filename.name) as rows:
+    def identify(self, filepath: str):
+        with csv_open(filepath) as rows:
+            if not self.language.identify(rows.fieldnames):
+                return False
             try:
                 row = next(rows)
-                if not self.language.identify(list(next(rows).keys())):
-                    return False
-
                 row = self.language.normalize_keys(row)
                 if not (row['from'] == self.email_address or row['to'] == self.email_address):
                     return False
-
                 return True
             except StopIteration:
                 return False
 
-
-    def extract(self, filename):
+    def extract(self, filepath: str):
         entries = []
         last_txn_id = None
         last_net = None
         last_currency = None
         last_was_currency = False
 
-        with csv_open(filename.name) as rows:
+        with csv_open(filepath) as rows:
             for index, row in enumerate(rows):
-                metadata = { k: row[v] for k, v in self.metadata_map.items() }
+                metadata = {k: row[v] for k, v in self.metadata_map.items()}
                 row = self.language.normalize_keys(row)
 
                 row['date'] = self.language.parse_date(row['date']).date()
@@ -80,7 +76,7 @@ class PaypalImporter(Importer):
                 row['net'] = self.language.decimal(row['net'])
 
                 if row['reference_txn_id'] != last_txn_id:
-                    meta = data.new_metadata(filename.name, index, metadata)
+                    meta = data.new_metadata(filepath, index, metadata)
 
                     txn = data.Transaction(
                         meta=meta,
@@ -97,7 +93,7 @@ class PaypalImporter(Importer):
                     txn.postings.append(
                         data.Posting(
                             self.checking_account,
-                            amount.Amount(-1*D(row['gross']), row['currency']),
+                            amount.Amount(-D(row['gross']), row['currency']),
                             None, None, None, None
                         )
                     )
@@ -124,7 +120,7 @@ class PaypalImporter(Importer):
                                 self.account,
                                 amount.Amount(D(row['net']), row['currency']),
                                 None,
-                                amount.Amount(-1*(D(last_net) / D(row['net'])), last_currency),
+                                amount.Amount(- (D(last_net) / D(row['net'])), last_currency),
                                 None, None
                             )
                         )
@@ -158,20 +154,17 @@ class PaypalImporter(Importer):
                     entries.append(txn)
                     last_txn_id = row['txn_id']
 
-                last_currency = row['currency']
-                last_amount = amount
-
-        if 'balance' in row:
-            meta = data.new_metadata(filename.name, index + 1)
-            entries.append(
-                data.Balance(
-                    meta,
-                    row['date'] + timedelta(days=1),
-                    self.account,
-                    amount.Amount(D(self.language.decimal(row['balance'])), row['currency']),
-                    None,
-                    None,
+            if 'balance' in row:
+                meta = data.new_metadata(filepath, index + 1)
+                entries.append(
+                    data.Balance(
+                        meta,
+                        row['date'] + timedelta(days=1),
+                        self.account,
+                        amount.Amount(D(self.language.decimal(row['balance'])), row['currency']),
+                        None,
+                        None,
+                    )
                 )
-            )
 
         return entries
