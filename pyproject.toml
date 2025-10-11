@@ -34,4 +34,6 @@ Source = "https://github.com/nils-werner/beancount-paypal"
 packages = ["beancount_paypal"]
 
 [tool.uv]
-dev-dependencies = []
+dev-dependencies = [
+    "ruff>=0.14.0",
+]

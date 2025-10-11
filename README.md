@@ -24,6 +24,15 @@ cd beancount-paypal
 uv sync
 ```
 
+#### Code quality
+
+This project uses [ruff](https://docs.astral.sh/ruff/) for linting and formatting:
+
+```sh
+uv run ruff check .     # lint
+uv run ruff format .    # format
+```
+
 ## Usage
 
 ### Basic usage
