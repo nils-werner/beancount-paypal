@@ -4,8 +4,24 @@
 
 ## Installation
 
+### Using uv (recommended)
+
+```sh
+uv add git+https://github.com/nils-werner/beancount-paypal.git
+```
+
+### Using pip
+
 ```sh
 pip install git+https://github.com/nils-werner/beancount-paypal.git
+```
+
+### For development
+
+```sh
+git clone https://github.com/nils-werner/beancount-paypal.git
+cd beancount-paypal
+uv sync
 ```
 
 ## Usage
