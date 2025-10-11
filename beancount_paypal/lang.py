@@ -53,12 +53,14 @@ class en(base):
         "recipient": "To Email Address",
     }
 
-    _format = "%d/%m/%Y"
+    _format = "%m/%d/%Y"  # US date format: MM/DD/YYYY
     _from_checking = "Bank Deposit to PP Account "
     _currency_conversion = "General Currency Conversion"
 
     def decimal(self, data):
-        return data.replace(".", "").replace(",", ".")
+        # US format: period is decimal separator, comma is thousands separator
+        # Remove thousands separators (commas) and keep period as decimal
+        return data.replace(",", "")
 
 
 class de(base):
