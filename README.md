@@ -1,6 +1,6 @@
 # Beancount PayPal Importer
 
-`beancount-paypal` provides an Importer for converting CSV exports of PayPal into the beancount format.
+`beancount-paypal` provides a beangulp-compatible Importer for converting CSV exports of PayPal into the beancount format.
 
 ## Installation
 
@@ -37,7 +37,7 @@ uv run ruff format .    # format
 
 ### Basic usage
 
-Configure `PaypalImporter` in your importer script, and download your PayPal statements as CSV.
+Configure `PaypalImporter` in your beangulp importer script, and download your PayPal statements as CSV.
 
 In PayPal you can customize the report fields. If you enable `Transaction Details > Balance`, the
 beancount output will be finalized with a `balance` assertion.
@@ -54,6 +54,12 @@ CONFIG = [
         'Expenses:Financial:Commission',
     )
 ]
+```
+
+Use with beangulp:
+
+```bash
+beangulp extract CONFIG paypal_export.csv
 ```
 
 ### Advanced usage
@@ -78,4 +84,12 @@ CONFIG = [
         }
     )
 ]
+```
+
+Use with beangulp for import workflows:
+
+```bash
+beangulp identify CONFIG paypal_export.csv
+beangulp extract CONFIG paypal_export.csv > new_entries.beancount
+beangulp file CONFIG paypal_export.csv
 ```

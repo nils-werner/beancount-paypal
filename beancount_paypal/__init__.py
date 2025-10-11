@@ -1,5 +1,5 @@
 from beancount.core.number import D
-from beancount.ingest import importer
+from beangulp import Importer
 from beancount.core import amount
 from beancount.core import flags
 from beancount.core import data
@@ -18,11 +18,11 @@ def csv_open(filename):
         yield csv.DictReader(f, quotechar='"')
 
 
-class PaypalImporter(importer.ImporterProtocol):
+class PaypalImporter(Importer):
     def __init__(
         self,
         email_address,
-        account,
+        account_name,
         checking_account,
         commission_account,
         language=None,
@@ -35,17 +35,17 @@ class PaypalImporter(importer.ImporterProtocol):
             metadata_map = language.metadata_map
 
         self.email_address = email_address
-        self.account = account
+        self.account_name = account_name
         self.checking_account = checking_account
         self.commission_account = commission_account
         self.language = language
         self.metadata_map = metadata_map
 
-    def file_account(self, _):
-        return self.account
+    def account(self, filepath):
+        return self.account_name
 
-    def identify(self, filename):
-        with csv_open(filename.name) as rows:
+    def identify(self, filepath):
+        with csv_open(filepath) as rows:
             try:
                 row = next(rows)
                 if not self.language.identify(list(next(rows).keys())):
@@ -61,14 +61,14 @@ class PaypalImporter(importer.ImporterProtocol):
             except StopIteration:
                 return False
 
-    def extract(self, filename):
+    def extract(self, filepath, existing=None):
         entries = []
         last_txn_id = None
         last_net = None
         last_currency = None
         last_was_currency = False
 
-        with csv_open(filename.name) as rows:
+        with csv_open(filepath) as rows:
             for index, row in enumerate(rows):
                 metadata = {k: row[v] for k, v in self.metadata_map.items()}
                 row = self.language.normalize_keys(row)
@@ -79,7 +79,7 @@ class PaypalImporter(importer.ImporterProtocol):
                 row["net"] = self.language.decimal(row["net"])
 
                 if row["reference_txn_id"] != last_txn_id:
-                    meta = data.new_metadata(filename.name, index, metadata)
+                    meta = data.new_metadata(filepath, index, metadata)
 
                     txn = data.Transaction(
                         meta=meta,
@@ -108,7 +108,7 @@ class PaypalImporter(importer.ImporterProtocol):
 
                     txn.postings.append(
                         data.Posting(
-                            self.account,
+                            self.account_name,
                             amount.Amount(D(row["net"]), row["currency"]),
                             None,
                             None,
@@ -121,7 +121,7 @@ class PaypalImporter(importer.ImporterProtocol):
                     if last_was_currency:
                         txn.postings.append(
                             data.Posting(
-                                self.account,
+                                self.account_name,
                                 amount.Amount(D(last_net), last_currency),
                                 None,
                                 None,
@@ -131,7 +131,7 @@ class PaypalImporter(importer.ImporterProtocol):
                         )
                         txn.postings.append(
                             data.Posting(
-                                self.account,
+                                self.account_name,
                                 amount.Amount(D(row["net"]), row["currency"]),
                                 None,
                                 amount.Amount(
@@ -152,7 +152,7 @@ class PaypalImporter(importer.ImporterProtocol):
                 else:
                     txn.postings.append(
                         data.Posting(
-                            self.account,
+                            self.account_name,
                             amount.Amount(D(row["gross"]), row["currency"]),
                             None,
                             None,
@@ -180,12 +180,12 @@ class PaypalImporter(importer.ImporterProtocol):
                 last_currency = row["currency"]
 
         if "balance" in row:
-            meta = data.new_metadata(filename.name, index + 1)
+            meta = data.new_metadata(filepath, index + 1)
             entries.append(
                 data.Balance(
                     meta,
                     row["date"] + timedelta(days=1),
-                    self.account,
+                    self.account_name,
                     amount.Amount(
                         D(self.language.decimal(row["balance"])), row["currency"]
                     ),
@@ -195,3 +195,18 @@ class PaypalImporter(importer.ImporterProtocol):
             )
 
         return entries
+
+    def date(self, filepath):
+        """Return the date associated with this file."""
+        try:
+            entries = self.extract(filepath)
+            if entries:
+                return max(entry.date for entry in entries if hasattr(entry, "date"))
+        except Exception:
+            pass
+        return None
+
+    def filename(self, filepath):
+        """Return the archival filename for the given file."""
+        # PayPal files don't have a standard naming pattern, so return None
+        return None

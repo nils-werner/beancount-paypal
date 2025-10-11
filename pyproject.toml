@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "beancount-paypal"
 version = "0.1.0"
-description = "Beancount Importer for PayPal CSV exports"
+description = "Beangulp-compatible Beancount Importer for PayPal CSV exports"
 readme = "README.md"
 license = "MIT"
 authors = [
@@ -24,6 +24,7 @@ classifiers = [
 ]
 dependencies = [
     "beancount",
+    "beangulp",
 ]
 requires-python = ">=3.8"
 
