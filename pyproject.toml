@@ -34,7 +34,8 @@ Source = "https://github.com/nils-werner/beancount-paypal"
 [tool.hatch.build.targets.wheel]
 packages = ["beancount_paypal"]
 
-[tool.uv]
-dev-dependencies = [
+[dependency-groups]
+dev = [
     "ruff>=0.14.0",
+    "pytest>=7.0.0",
 ]
