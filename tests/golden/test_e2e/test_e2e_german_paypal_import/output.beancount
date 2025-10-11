@@ -1,0 +1,34 @@
+;; -*- mode: beancount -*-
+
+
+2025-09-15 * "Max Mustermann" "Pizza bestellen"
+  uuid: "1A234567BC890123D"
+  sender: "test@example.com"
+  recipient: "max@example.com"
+  Assets:PayPal        25.00 EUR
+  Expenses:Commission   1.50 EUR
+
+2025-09-20 * "Anna Schmidt" "Online Shopping"
+  uuid: "2B345678CD901234E"
+  sender: "max@example.com"
+  recipient: "anna@example.com"
+  Assets:PayPal        -50.00 EUR
+  Expenses:Commission    2.00 EUR
+
+2025-09-25 * "PayPal" "USD zu EUR"
+  uuid: "5E678901FG234567H"
+  sender: ""
+  recipient: ""
+  Assets:PayPal    92.15 EUR
+  Assets:PayPal  -100.00 USD @ 0.9215 EUR
+
+2025-09-30 * "Maria Weber" "Geschenk"
+  uuid: "9I012345JK678901L"
+  sender: "maria@example.com"
+  recipient: "max@example.com"
+  Assets:PayPal        15.75 EUR
+  Expenses:Commission   0.75 EUR
+
+2025-10-01 balance Assets:PayPal                                   80.90 EUR
+
+
