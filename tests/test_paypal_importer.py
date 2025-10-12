@@ -167,7 +167,7 @@ def test_english_csv_with_fees(tmpdir):
     # PayPal account credit (gross amount)
     paypal_posting = txn1.postings[0]
     assert paypal_posting.account == "Assets:PayPal"
-    assert paypal_posting.units == Amount(Decimal("100.00"), "USD")
+    assert paypal_posting.units == Amount(Decimal("97.10"), "USD")
 
     # Commission fee
     commission_posting = txn1.postings[1]
@@ -239,7 +239,7 @@ def test_german_csv_basic_import(tmpdir):
     # PayPal account credit (gross amount)
     paypal_posting = txn1.postings[0]
     assert paypal_posting.account == "Assets:PayPal"
-    assert paypal_posting.units == Amount(Decimal("25.00"), "EUR")
+    assert paypal_posting.units == Amount(Decimal("23.50"), "EUR")
 
     # Commission fee
     commission_posting = txn1.postings[1]
@@ -259,7 +259,7 @@ def test_german_csv_basic_import(tmpdir):
     # PayPal account debit
     paypal_posting2 = txn2.postings[0]
     assert paypal_posting2.account == "Assets:PayPal"
-    assert paypal_posting2.units == Amount(Decimal("-50.00"), "EUR")
+    assert paypal_posting2.units == Amount(Decimal("-52.00"), "EUR")
 
     # Commission fee
     commission_posting2 = txn2.postings[1]

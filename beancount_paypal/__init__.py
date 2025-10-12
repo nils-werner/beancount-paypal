@@ -153,7 +153,7 @@ class PaypalImporter(Importer):
                     txn.postings.append(
                         data.Posting(
                             self.account_name,
-                            amount.Amount(D(row["gross"]), row["currency"]),
+                            amount.Amount(D(row["net"]), row["currency"]),
                             None,
                             None,
                             None,
