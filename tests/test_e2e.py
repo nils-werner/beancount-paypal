@@ -46,6 +46,23 @@ def test_e2e_english_paypal_import(testdata_dir, golden_dir, pytestconfig):
     # Compare or update golden file
     compare_or_update_golden(pytestconfig, output_file, output_text)
 
+    """To try the resulting output.beancount file with beancount or fava you
+    can add the following at the beginning of the file:
+
+option "operating_currency" "USD"
+
+1970-01-01 commodity USD
+
+1970-01-01 open Assets:PayPal USD
+1970-01-01 open Assets:Checking USD
+1970-01-01 open Expenses:Commission USD
+1970-01-01 open Equity:Opening-Balances USD
+
+1970-01-01 * "Initial capital"
+  Equity:Opening-Balances -1000 USD
+  Assets:PayPal
+"""
+
 
 def test_e2e_german_paypal_import(testdata_dir, golden_dir, pytestconfig):
     """Test end-to-end conversion of German PayPal CSV to Beancount format."""
@@ -86,3 +103,24 @@ def test_e2e_german_paypal_import(testdata_dir, golden_dir, pytestconfig):
 
     # Compare or update golden file
     compare_or_update_golden(pytestconfig, output_file, output_text)
+
+    """To try the resulting output.beancount file with beancount or fava you
+    can add the following at the beginning of the file:
+
+option "operating_currency" "EUR"
+
+1970-01-01 commodity EUR
+1970-01-01 commodity USD
+
+1970-01-01 open Assets:PayPal EUR,USD
+1970-01-01 open Expenses:Commission EUR
+1970-01-01 open Equity:Opening-Balances EUR,USD
+
+1970-01-01 * "Initial capital"
+  Equity:Opening-Balances -100 EUR
+  Assets:PayPal
+
+1970-01-01 * "Initial capital"
+  Equity:Opening-Balances -100 USD
+  Assets:PayPal
+"""
