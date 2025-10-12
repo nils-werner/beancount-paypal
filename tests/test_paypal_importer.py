@@ -70,8 +70,9 @@ def test_currency_conversion_transactions(tmpdir):
     """Test importing currency conversion transactions from German PayPal CSV."""
 
     input_data = """Datum,Uhrzeit,Zeitzone,Name,Typ,Status,Währung,Brutto,Gebühr,Netto,Absender E-Mail-Adresse,Empfänger E-Mail-Adresse,Transaktionscode,Status Gegenpartei,Adress-Status,Artikelbezeichnung,Artikelnummer,Option 1 Name,Option 1 Wert,Option 2 Name,Option 2 Wert,Zugehöriger Transaktionscode,Zollnummer,Anzahl,Empfangsnummer,Guthaben,Telefon,Betreff,Hinweis,Auswirkung auf Guthaben,E-Börse des Käufers
-25.09.2025,16:20:11,CEST,PayPal,Allgemeine Währungsumrechnung,Abgeschlossen,EUR,"92,15","0,00","92,15",,,5E678901FG234567H,,,,,,,,,5E678901FG234567H,,,,"592,15",,USD zu EUR,Haben,
-25.09.2025,16:20:11,CEST,PayPal,Allgemeine Währungsumrechnung,Abgeschlossen,USD,"-100,00","0,00","-100,00",,,5E678901FG234567H,,,,,,,,,5E678901FG234567H,,,,"900,00",,USD zu EUR,Soll,
+30.07.2025,17:23:12,CEST,Parker Lee,Allgemeine Zahlung,Abgeschlossen,USD,"-16,77","-1,11","-17,88",tom@example.com,parker@example.com,77X89361Y2723698G,Nicht verifiziert,Nicht bestätigt,,,,,,,,,,,"-17,88",,,Personal bet,Soll
+30.07.2025,17:23:12,CEST,,Allgemeine Währungsumrechnung,Abgeschlossen,EUR,"-15,99","0","-15,99",tom@example.com,,87X89361Y2723698G,,,,,,,,,77X89361Y2723698G,,,,"540,26",,,,Soll
+30.07.2025,17:23:12,CEST,,Allgemeine Währungsumrechnung,Abgeschlossen,USD,"17,88","0","17,88",tom@example.com,,97X89361Y2723698G,,,,,,,,,77X89361Y2723698G,,,,"0",,,,Haben
 """
     input_file = tmpdir / "input.csv"
     with open(input_file, "w") as f:
@@ -79,10 +80,11 @@ def test_currency_conversion_transactions(tmpdir):
 
     # Create importer for German CSV
     importer = PaypalImporter(
-        email_address="",  # No email filtering for currency conversion
+        email_address="tom@example.com",
         account_name="Assets:PayPal",
         checking_account="Assets:Checking",
         commission_account="Expenses:Commission",
+        default_expense_account="Expenses:TODO",
         language=lang.de(),
     )
 
@@ -98,31 +100,41 @@ def test_currency_conversion_transactions(tmpdir):
     # Check transaction (currency conversion creates one transaction with multiple postings)
     txn = entries[0]
     assert isinstance(txn, Transaction)
-    assert txn.date == date(2025, 9, 25)
-    assert txn.payee == "PayPal"
-    assert txn.narration == "USD zu EUR"
+    assert txn.date == date(2025, 7, 30)
+    assert txn.payee == "Parker Lee"
+    assert txn.narration == "Personal bet"
 
-    # Check postings - currency conversion should have 2 postings
-    assert len(txn.postings) == 2
+    # Check postings - currency conversion should have 3 postings
+    assert len(txn.postings) == 5
 
-    # First posting: EUR credit with USD price
     posting1 = txn.postings[0]
     assert posting1.account == "Assets:PayPal"
-    assert posting1.units == Amount(Decimal("92.15"), "EUR")
+    assert posting1.units == Amount(Decimal("-17.88"), "USD")
 
-    # Second posting: EUR debit with USD price
     posting2 = txn.postings[1]
-    assert posting2.account == "Assets:PayPal"
-    assert posting2.units == Amount(Decimal("-100.00"), "USD")
+    assert posting2.account == "Expenses:TODO"
+    assert posting2.units == Amount(Decimal("16.77"), "USD")
+
+    posting3 = txn.postings[2]
+    assert posting3.account == "Expenses:Commission"
+    assert posting3.units == Amount(Decimal("1.11"), "USD")
+
+    posting4 = txn.postings[3]
+    assert posting4.account == "Assets:PayPal"
+    assert posting4.units == Amount(Decimal("-15.99"), "EUR")
+
+    posting5 = txn.postings[4]
+    assert posting5.account == "Assets:PayPal"
+    assert posting5.units == Amount(Decimal("17.88"), "USD")
     # Should have a price showing conversion rate
-    assert posting2.price is not None
-    assert posting2.price.currency == "EUR"
+    assert posting5.price is not None
+    assert posting5.price.currency == "EUR"
 
     balance_entry = entries[1]
     assert isinstance(balance_entry, Balance)
     assert balance_entry.account == "Assets:PayPal"
-    assert balance_entry.amount == Amount(Decimal("900"), "USD")
-    assert balance_entry.date == date(2025, 9, 26)  # Next day
+    assert balance_entry.amount == Amount(Decimal("0"), "USD")
+    assert balance_entry.date == date(2025, 7, 31)  # Next day
 
 
 def test_english_csv_with_fees(tmpdir):

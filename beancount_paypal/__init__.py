@@ -193,11 +193,11 @@ class PaypalImporter(Importer):
                             )
                         )
 
-                if D(row["fee"]) > 0:
+                if D(row["fee"]) != 0:
                     txn.postings.append(
                         data.Posting(
                             self.commission_account,
-                            amount.Amount(D(row["fee"]), row["currency"]),
+                            amount.Amount(abs(D(row["fee"])), row["currency"]),
                             None,
                             None,
                             None,
