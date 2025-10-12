@@ -6,6 +6,7 @@
   sender: "farha@example.com"
   recipient: "max@example.com"
   Assets:PayPal        23.5 EUR
+  Income:TODO           -25 EUR
   Expenses:Commission   1.5 EUR
 
 2025-09-20 * "Anna Schmidt" "Online Shopping"
@@ -13,6 +14,7 @@
   sender: "max@example.com"
   recipient: "anna@example.com"
   Assets:PayPal        -52 EUR
+  Expenses:TODO         50 EUR
   Expenses:Commission    2 EUR
 
 2025-09-25 * "PayPal" "USD zu EUR"
@@ -26,8 +28,9 @@
   uuid: "9I012345JK678901L"
   sender: "maria@example.com"
   recipient: "max@example.com"
-  Assets:PayPal          15 EUR
-  Expenses:Commission  0.75 EUR
+  Assets:PayPal            15 EUR
+  Income:TODO          -15.75 EUR
+  Expenses:Commission    0.75 EUR
 
 2025-10-01 balance Assets:PayPal                                   178.65 EUR
 

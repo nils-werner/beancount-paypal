@@ -271,3 +271,185 @@ def test_german_csv_basic_import(tmpdir):
     assert balance_entry.account == "Assets:PayPal"
     assert balance_entry.amount == Amount(Decimal("71.50"), "EUR")
     assert balance_entry.date == date(2025, 9, 21)  # Next day
+
+
+def test_default_expense_account_only(tmpdir):
+    """Test importing transactions with only default_expense_account specified."""
+
+    input_data = """Date,Time,TimeZone,Name,Type,Status,Currency,Gross,Fee,Net,From Email Address,To Email Address,Transaction ID,Counterparty Status,Address Status,Item Title,Item ID,Option 1 Name,Option 1 Value,Option 2 Name,Option 2 Value,Reference Txn ID,Invoice Number,Custom Number,Receipt ID,Balance,Contact Phone Number,Subject,Note,Memo,Bank Name
+09/15/2025,02:32:15,PDT,Sender Doe,Mobile Payment,Completed,USD,100.00,2.90,97.10,sender@example.com,john@example.com,3C456789DE012345F,Verified,Confirmed,,,,,,,3C456789DE012345F,,,,897.10,,Service payment,Credit,
+09/22/2025,11:45:33,PDT,Jane Smith,Shopping Cart Payment,Completed,USD,-75.00,0.00,-75.00,john@example.com,jane@example.com,4D567890EF123456G,Verified,Unconfirmed,Premium Subscription,,,,,,4D567890EF123456G,,,,822.10,,Monthly subscription,Debit,
+"""
+    input_file = tmpdir / "input.csv"
+    with open(input_file, "w") as f:
+        f.write(input_data)
+
+    # Create importer with only default_expense_account
+    importer = PaypalImporter(
+        email_address="john@example.com",
+        account_name="Assets:PayPal",
+        checking_account="Assets:Checking",
+        commission_account="Expenses:Commission",
+        default_expense_account="Expenses:TODO",
+        language=lang.en(),
+    )
+
+    # Test extraction
+    entries = importer.extract(input_file)
+
+    # Should have 3 entries: 2 transactions + 1 balance
+    assert len(entries) == 3
+
+    # First transaction (incoming payment) - should NOT have default account posting
+    txn1 = entries[0]
+    assert isinstance(txn1, Transaction)
+    assert len(txn1.postings) == 2  # Only PayPal and Commission, no Income account
+
+    # PayPal account credit
+    paypal_posting = txn1.postings[0]
+    assert paypal_posting.account == "Assets:PayPal"
+    assert paypal_posting.units == Amount(Decimal("97.10"), "USD")
+
+    # Commission fee
+    commission_posting = txn1.postings[1]
+    assert commission_posting.account == "Expenses:Commission"
+    assert commission_posting.units == Amount(Decimal("2.90"), "USD")
+
+    # Second transaction (outgoing payment) - SHOULD have default expense account
+    txn2 = entries[1]
+    assert isinstance(txn2, Transaction)
+    assert len(txn2.postings) == 2  # PayPal and Expenses:TODO
+
+    # PayPal account debit
+    paypal_posting2 = txn2.postings[0]
+    assert paypal_posting2.account == "Assets:PayPal"
+    assert paypal_posting2.units == Amount(Decimal("-75.00"), "USD")
+
+    # Default expense account
+    expense_posting = txn2.postings[1]
+    assert expense_posting.account == "Expenses:TODO"
+    assert expense_posting.units == Amount(Decimal("75.00"), "USD")  # Positive amount
+
+
+def test_default_income_account_only(tmpdir):
+    """Test importing transactions with only default_income_account specified."""
+
+    input_data = """Date,Time,TimeZone,Name,Type,Status,Currency,Gross,Fee,Net,From Email Address,To Email Address,Transaction ID,Counterparty Status,Address Status,Item Title,Item ID,Option 1 Name,Option 1 Value,Option 2 Name,Option 2 Value,Reference Txn ID,Invoice Number,Custom Number,Receipt ID,Balance,Contact Phone Number,Subject,Note,Memo,Bank Name
+09/15/2025,02:32:15,PDT,Sender Doe,Mobile Payment,Completed,USD,100.00,2.90,97.10,sender@example.com,john@example.com,3C456789DE012345F,Verified,Confirmed,,,,,,,3C456789DE012345F,,,,897.10,,Service payment,Credit,
+09/22/2025,11:45:33,PDT,Jane Smith,Shopping Cart Payment,Completed,USD,-75.00,0.00,-75.00,john@example.com,jane@example.com,4D567890EF123456G,Verified,Unconfirmed,Premium Subscription,,,,,,4D567890EF123456G,,,,822.10,,Monthly subscription,Debit,
+"""
+    input_file = tmpdir / "input.csv"
+    with open(input_file, "w") as f:
+        f.write(input_data)
+
+    # Create importer with only default_income_account
+    importer = PaypalImporter(
+        email_address="john@example.com",
+        account_name="Assets:PayPal",
+        checking_account="Assets:Checking",
+        commission_account="Expenses:Commission",
+        default_income_account="Income:TODO",
+        language=lang.en(),
+    )
+
+    # Test extraction
+    entries = importer.extract(input_file)
+
+    # Should have 3 entries: 2 transactions + 1 balance
+    assert len(entries) == 3
+
+    # First transaction (incoming payment) - SHOULD have default income account
+    txn1 = entries[0]
+    assert isinstance(txn1, Transaction)
+    assert len(txn1.postings) == 3  # PayPal, Income:TODO, and Commission
+
+    # PayPal account credit
+    paypal_posting = txn1.postings[0]
+    assert paypal_posting.account == "Assets:PayPal"
+    assert paypal_posting.units == Amount(Decimal("97.10"), "USD")
+
+    # Default income account (posting order: PayPal, Income, Commission)
+    income_posting = txn1.postings[1]
+    assert income_posting.account == "Income:TODO"
+    assert income_posting.units == Amount(
+        Decimal("-100.00"), "USD"
+    )  # Negative gross amount
+
+    # Commission fee
+    commission_posting = txn1.postings[2]
+    assert commission_posting.account == "Expenses:Commission"
+    assert commission_posting.units == Amount(Decimal("2.90"), "USD")
+
+    # Second transaction (outgoing payment) - should NOT have default account posting
+    txn2 = entries[1]
+    assert isinstance(txn2, Transaction)
+    assert len(txn2.postings) == 1  # Only PayPal, no fee and no Expense account
+
+    # PayPal account debit
+    paypal_posting2 = txn2.postings[0]
+    assert paypal_posting2.account == "Assets:PayPal"
+    assert paypal_posting2.units == Amount(Decimal("-75.00"), "USD")
+
+
+def test_both_default_accounts(tmpdir):
+    """Test importing transactions with both default accounts specified."""
+
+    input_data = """Date,Time,TimeZone,Name,Type,Status,Currency,Gross,Fee,Net,From Email Address,To Email Address,Transaction ID,Counterparty Status,Address Status,Item Title,Item ID,Option 1 Name,Option 1 Value,Option 2 Name,Option 2 Value,Reference Txn ID,Invoice Number,Custom Number,Receipt ID,Balance,Contact Phone Number,Subject,Note,Memo,Bank Name
+09/15/2025,02:32:15,PDT,Sender Doe,Mobile Payment,Completed,USD,100.00,2.90,97.10,sender@example.com,john@example.com,3C456789DE012345F,Verified,Confirmed,,,,,,,3C456789DE012345F,,,,897.10,,Service payment,Credit,
+09/22/2025,11:45:33,PDT,Jane Smith,Shopping Cart Payment,Completed,USD,-75.00,0.00,-75.00,john@example.com,jane@example.com,4D567890EF123456G,Verified,Unconfirmed,Premium Subscription,,,,,,4D567890EF123456G,,,,822.10,,Monthly subscription,Debit,
+09/30/2025,08:30:00,PDT,My Bank,Bank Deposit to PP Account ,Completed,USD,500.00,0.00,500.00,,,6F789012GH345678I,,,,,,,,,6F789012GH345678I,,,,1322.10,,Bank transfer,Credit,
+"""
+    input_file = tmpdir / "input.csv"
+    with open(input_file, "w") as f:
+        f.write(input_data)
+
+    # Create importer with both default accounts
+    importer = PaypalImporter(
+        email_address="john@example.com",
+        account_name="Assets:PayPal",
+        checking_account="Assets:Checking",
+        commission_account="Expenses:Commission",
+        default_expense_account="Expenses:TODO",
+        default_income_account="Income:TODO",
+        language=lang.en(),
+    )
+
+    # Test extraction
+    entries = importer.extract(input_file)
+
+    # Should have 4 entries: 3 transactions + 1 balance
+    assert len(entries) == 4
+
+    # First transaction (incoming payment) - should have income account
+    txn1 = entries[0]
+    assert isinstance(txn1, Transaction)
+    assert len(txn1.postings) == 3  # PayPal, Income:TODO, Commission
+
+    # Check income posting (posting order: PayPal, Income, Commission)
+    income_posting = txn1.postings[1]
+    assert income_posting.account == "Income:TODO"
+    assert income_posting.units == Amount(Decimal("-100.00"), "USD")
+
+    # Second transaction (outgoing payment) - should have expense account
+    txn2 = entries[1]
+    assert isinstance(txn2, Transaction)
+    assert len(txn2.postings) == 2  # PayPal, Expenses:TODO
+
+    # Check expense posting (posting order: PayPal, Expense)
+    expense_posting = txn2.postings[1]
+    assert expense_posting.account == "Expenses:TODO"
+    assert expense_posting.units == Amount(Decimal("75.00"), "USD")
+
+    # Third transaction (bank deposit) - should NOT have default accounts
+    txn3 = entries[2]
+    assert isinstance(txn3, Transaction)
+    assert len(txn3.postings) == 2  # Only Checking and PayPal
+
+    # Check bank deposit postings
+    checking_posting = txn3.postings[0]
+    assert checking_posting.account == "Assets:Checking"
+    assert checking_posting.units == Amount(Decimal("-500.00"), "USD")
+
+    paypal_posting3 = txn3.postings[1]
+    assert paypal_posting3.account == "Assets:PayPal"
+    assert paypal_posting3.units == Amount(Decimal("500.00"), "USD")

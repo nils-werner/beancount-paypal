@@ -52,6 +52,8 @@ CONFIG = [
         'Assets:US:PayPal',
         'Assets:US:Checking',
         'Expenses:Financial:Commission',
+        default_expense_account='Expenses:TODO',  # optional
+        default_income_account='Income:TODO',  # optional
     )
 ]
 ```

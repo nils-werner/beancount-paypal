@@ -25,6 +25,8 @@ class PaypalImporter(Importer):
         account_name,
         checking_account,
         commission_account,
+        default_expense_account=None,
+        default_income_account=None,
         language=None,
         metadata_map=None,
     ):
@@ -38,6 +40,8 @@ class PaypalImporter(Importer):
         self.account_name = account_name
         self.checking_account = checking_account
         self.commission_account = commission_account
+        self.default_expense_account = default_expense_account
+        self.default_income_account = default_income_account
         self.language = language
         self.metadata_map = metadata_map
 
@@ -150,6 +154,7 @@ class PaypalImporter(Importer):
                         last_was_currency = True
 
                 else:
+                    # Regular transaction (not bank deposit or currency conversion)
                     txn.postings.append(
                         data.Posting(
                             self.account_name,
@@ -160,6 +165,33 @@ class PaypalImporter(Importer):
                             None,
                         )
                     )
+
+                    # Add default income/expense account posting if specified
+                    gross_amount = D(row["gross"])
+                    if gross_amount > 0 and self.default_income_account:
+                        # Incoming payment - add income account with negative gross
+                        txn.postings.append(
+                            data.Posting(
+                                self.default_income_account,
+                                amount.Amount(-gross_amount, row["currency"]),
+                                None,
+                                None,
+                                None,
+                                None,
+                            )
+                        )
+                    elif gross_amount < 0 and self.default_expense_account:
+                        # Outgoing payment - add expense account with positive gross
+                        txn.postings.append(
+                            data.Posting(
+                                self.default_expense_account,
+                                amount.Amount(-gross_amount, row["currency"]),
+                                None,
+                                None,
+                                None,
+                                None,
+                            )
+                        )
 
                 if D(row["fee"]) > 0:
                     txn.postings.append(

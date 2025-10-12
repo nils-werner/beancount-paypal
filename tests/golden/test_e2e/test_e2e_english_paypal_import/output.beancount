@@ -5,14 +5,16 @@
   uuid: "3C456789DE012345F"
   sender: "farha@example.com"
   recipient: "john@example.com"
-  Assets:PayPal        97.10 USD
-  Expenses:Commission   2.90 USD
+  Assets:PayPal          97.10 USD
+  Income:TODO          -100.00 USD
+  Expenses:Commission     2.90 USD
 
 2025-09-22 * "Jane Smith" "Premium Subscription"
   uuid: "4D567890EF123456G"
   sender: "john@example.com"
   recipient: "jane@example.com"
   Assets:PayPal  -75.00 USD
+  Expenses:TODO   75.00 USD
 
 2025-09-30 * "My Bank" "Bank transfer"
   uuid: "6F789012GH345678I"
@@ -25,14 +27,16 @@
   uuid: "7G890123HI456789J"
   sender: "coffee@shop.com"
   recipient: "john@example.com"
-  Assets:PayPal        24.25 USD
-  Expenses:Commission   1.25 USD
+  Assets:PayPal         24.25 USD
+  Income:TODO          -25.50 USD
+  Expenses:Commission    1.25 USD
 
 2025-10-05 * "Alice Cooper" "Birthday gift"
   uuid: "8H901234IJ567890K"
   sender: "john@example.com"
   recipient: "alice@example.com"
   Assets:PayPal        -52.50 USD
+  Expenses:TODO         50.00 USD
   Expenses:Commission    2.50 USD
 
 2025-10-06 balance Assets:PayPal                                   1493.85 USD

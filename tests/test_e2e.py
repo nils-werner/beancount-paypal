@@ -18,6 +18,8 @@ def test_e2e_english_paypal_import(testdata_dir, golden_dir, pytestconfig):
         account_name="Assets:PayPal",
         checking_account="Assets:Checking",
         commission_account="Expenses:Commission",
+        default_expense_account="Expenses:TODO",
+        default_income_account="Income:TODO",
         language=lang.en(),
     )
 
@@ -57,6 +59,8 @@ option "operating_currency" "USD"
 1970-01-01 open Assets:Checking USD
 1970-01-01 open Expenses:Commission USD
 1970-01-01 open Equity:Opening-Balances USD
+1970-01-01 open Expenses:TODO USD
+1970-01-01 open Income:TODO USD
 
 1970-01-01 * "Initial capital"
   Equity:Opening-Balances -1000 USD
@@ -76,6 +80,8 @@ def test_e2e_german_paypal_import(testdata_dir, golden_dir, pytestconfig):
         account_name="Assets:PayPal",
         checking_account="Assets:Checking",
         commission_account="Expenses:Commission",
+        default_expense_account="Expenses:TODO",
+        default_income_account="Income:TODO",
         language=lang.de(),
     )
 
@@ -115,6 +121,8 @@ option "operating_currency" "EUR"
 1970-01-01 open Assets:PayPal EUR,USD
 1970-01-01 open Expenses:Commission EUR
 1970-01-01 open Equity:Opening-Balances EUR,USD
+1970-01-01 open Expenses:TODO EUR,USD
+1970-01-01 open Income:TODO EUR,USD
 
 1970-01-01 * "Initial capital"
   Equity:Opening-Balances -100 EUR
