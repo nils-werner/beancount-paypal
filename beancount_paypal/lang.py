@@ -97,3 +97,41 @@ class de(base):
 
     def decimal(self, data):
         return data.replace(".", "").replace(",", ".")
+
+
+class fr(base):
+    fields_map = {
+        "Date": "date",
+        "Heure": "time",
+        "Fuseau horaire": "timezone",
+        "Nom": "name",
+        "Type": "txn_type",
+        "État": "status",
+        "Devise": "currency",
+        "Avant commission": "gross",
+        "Commission": "fee",
+        "Net": "net",
+        "De l'adresse email": "from",
+        "À l'adresse email": "to",
+        "Numéro de transaction": "txn_id",
+        "Numéro de la transaction de référence": "reference_txn_id",
+        "Numéro de facture": "receipt_id",
+        # Optional keys:
+        "Titre de l'objet": "item_title",
+        "Objet": "subject",
+        "Remarque": "note",
+        "Solde": "balance",
+    }
+
+    metadata_map = {
+        "uuid": "Numéro de transaction",
+        "sender": "De l'adresse email",
+        "recipient": "À l'adresse email",
+    }
+
+    _format = "%d/%m/%Y"
+    _from_checking = "Virement bancaire sur le compte PayPal"
+    _currency_conversion = "Conversion de devise standard"
+
+    def decimal(self, data):
+        return data.replace(".", "").replace(",", ".")
