@@ -1,8 +1,11 @@
 from datetime import datetime
 
-class base():
+
+class base:
     def identify(self, fields):
-        return all(elem in fields for elem in list(self.fields_map.keys())[:-4])  # last 4 keys are optional
+        return all(
+            elem in fields for elem in list(self.fields_map.keys())[:-4]
+        )  # last 4 keys are optional
 
     def txn_from_checking(self, data):
         return data == self._from_checking
@@ -17,7 +20,7 @@ class base():
         return datetime.strptime(data, self._format)
 
     def normalize_keys(self, row):
-        return { self.fields_map.get(k, k):row[k] for k in row }
+        return {self.fields_map.get(k, k): row[k] for k in row}
 
 
 class en(base):
